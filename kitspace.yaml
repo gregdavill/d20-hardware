@@ -1,0 +1,37 @@
+multi:
+  d20-control:
+    summary: 2,400 LED Icosahedron (d20) - Controller Board
+    readme: README.md
+    bom: pcb/controller/d20_r0.1/kicad-src/d20_r0.1.kicad_pcb
+    eda:
+      type: kicad
+      pcb: pcb/controller/d20_r0.1/kicad-src/d20_r0.1.kicad_pcb
+    color: red
+    site: https://gregdavill.com/blog/d20
+  d20-control-panel-2x1:
+    summary: 2,400 LED Icosahedron (d20) - Controller Board 2x1 Panel
+    readme: README.md
+    bom: pcb/controller/d20_r0.1/panel-2x1/d20_r0.1_panel.kicad_pcb
+    eda:
+      type: kicad
+      pcb: pcb/controller/d20_r0.1/panel-2x1/d20_r0.1_panel.kicad_pcb
+    color: red
+    site: https://gregdavill.com/blog/d20
+  d20-tri:
+    summary: 2,400 LED Icosahedron (d20) - LED Board (r0.3)
+    readme: README.md
+    bom: pcb/led-panels/d20_tri_r0.3/kicad-src/d20_tri_r0.3.kicad_pcb
+    eda:
+      type: kicad
+      pcb: pcb/led-panels/d20_tri_r0.3/kicad-src/d20_tri_r0.3.kicad_pcb
+    color: black
+    site: https://gregdavill.com/blog/d20
+  d20-tri-panel-4x1:
+    summary: 2,400 LED Icosahedron (d20) - LED Board 4x1 Panel (r0.3)
+    readme: README.md
+    bom: pcb/led-panels/d20_tri_r0.3/panel-4x1/d20_tri_r0.3_4x1.kicad_pcb
+    eda:
+      type: kicad
+      pcb: pcb/led-panels/d20_tri_r0.3/panel-4x1/d20_tri_r0.3_4x1.kicad_pcb
+    color: black
+    site: https://gregdavill.com/blog/d20
