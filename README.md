@@ -1,5 +1,5 @@
 # d20-hardware
-Hardware design files for the icosahedran d20 build.
+Hardware design files for the icosahedron d20 build.
 
 Read the blog post to read more about the project: https://gregdavill.com/blog/d20
 
