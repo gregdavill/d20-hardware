@@ -1,9 +1,10 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from attr import fields
 from skidl import *
 from string import ascii_uppercase
 import subprocess
+import csv
 
 # Create LED RGB Matrix
 class matrix():
@@ -166,6 +167,56 @@ def d20_generate_design():
     inputBuffers[1]['Y1'] & sclk 
     
 
+
+def equal_dicts(d1, d2, ignore_keys):
+    d1_filtered = {k:v for k,v in d1.items() if k not in ignore_keys}
+    d2_filtered = {k:v for k,v in d2.items() if k not in ignore_keys}
+    return d1_filtered == d2_filtered
+
+
+def generate_bom(file):
+    parts = []
+    netlist = ''
+    def get_unique(part):
+        unique_parts = []
+        for p in parts:
+            skip = False
+            for _p in unique_parts:
+                if equal_dicts(p,_p,('ref')):
+                    _p['ref'] += p['ref']
+                    skip = True
+                    break
+            if skip:
+                continue
+            unique_parts += [dict(p)]
+        
+        for p in unique_parts:
+            p['qty'] = len(p['ref'])
+            p['ref'] = ",".join(p['ref'])
+        return unique_parts
+
+    def bom_line(self):
+        return {
+            'ref': [self.ref],
+            'value':self.value_str, 
+            'name':self.name, 
+            'pn': getattr(self, 'pn', ''),
+            'mfg': getattr(self, 'mfg', ''),
+        }
+        
+    for p in default_circuit.parts:
+        _p = bom_line(p)
+        parts += [_p]
+
+
+    u = get_unique(parts)
+    with open(file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = ['qty', 'ref', 'value', 'name', 'pn', 'mfg'])
+        writer.writeheader()
+        writer.writerows(u)
+
+    
+
 #===============================================================================
 # Instantiate the circuit and generate the netlist.
 #===============================================================================
@@ -176,4 +227,4 @@ if __name__ == "__main__":
     generate_xml()
 
     # Create a BOM
-    subprocess.call(['python3', '/usr/share/kicad/plugins/bom_csv_grouped_by_value.py', 'd20_tri_r0.3.xml', '../Production/d20_tri_r0.3.csv'])
+    generate_bom('../Production/d20_tri_r1.0.csv')
