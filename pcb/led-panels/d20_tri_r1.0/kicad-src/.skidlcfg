@@ -1,0 +1,26 @@
+{
+    "lib_search_paths": {
+        "kicad": [
+            ".",
+            "/usr/share/kicad/symbols",
+            "../../../lib/gkl"
+        ],
+        "spice": [
+            "."
+        ]
+    },
+    "footprint_search_paths": {
+        "kicad": [
+            ".",
+            "/usr/share/kicad/footprints",
+            "../../../lib/gkl"
+        ],
+        "skidl": [
+            "."
+        ],
+        "spice": [
+            "."
+        ]
+    },
+    "default_tool": "kicad"
+}
