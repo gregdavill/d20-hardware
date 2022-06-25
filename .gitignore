@@ -24,3 +24,8 @@ fp-info-cache
 # Exported BOM files
 *.xml
 *.csv
+
+*.erc
+*.log
+*.json
+*_lib_sklib.py

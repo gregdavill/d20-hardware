@@ -3,7 +3,7 @@
         "kicad": [
             ".",
             "/usr/share/kicad/symbols",
-            "../../../lib/gkl"
+            "../../../lib"
         ],
         "spice": [
             "."
@@ -13,7 +13,7 @@
         "kicad": [
             ".",
             "/usr/share/kicad/footprints",
-            "../../../lib/gkl"
+            "../../../lib"
         ],
         "skidl": [
             "."

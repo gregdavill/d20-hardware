@@ -33,7 +33,7 @@ def d20_generate_design():
     # Component templates.
     #===============================================================================
 
-    shift = Part('74xx', '74HC595', dest=TEMPLATE, footprint='gkl_misc:TSSOP-16_slim')
+    shift = Part('74xx', '74HC595', dest=TEMPLATE, footprint='Led_Panel:TSSOP-16_slim')
     shift.fields['pn'] = '74HC595PW\,118'
     shift.fields['mfg'] = 'Texas Instruments'
     shift.fields['pn_alt0'] = 'HC595 (TSSOP-16)'
@@ -56,11 +56,11 @@ def d20_generate_design():
 
     res = Part('Device', 'R', dest=TEMPLATE, footprint='Resistor_SMD:R_0402_1005Metric')
 
-    tlc59025 = Part('gkl_misc', 'TLC59025', dest=TEMPLATE, footprint='gkl_misc:SSOP-24_slim')
+    tlc59025 = Part('Led_Panel', 'TLC59025', dest=TEMPLATE, footprint='Led_Panel:SSOP-24_slim')
     tlc59025.fields['pn'] = 'SM16206S'
     tlc59025.fields['mfg'] = 'Sunmoon Micro'
 
-    buff = Part('gkl_misc', 'NC7WZ17', dest=TEMPLATE, footprint='gkl_misc:UDFN-6_1x1mm_P0.35mm')
+    buff = Part('Led_Panel', 'NC7WZ17', dest=TEMPLATE, footprint='Led_Panel:UDFN-6_1x1mm_P0.35mm')
     buff.fields['pn'] = 'NC7WZ17FHX'
     buff.fields['mfg'] = 'onsemi / Fairchild'
     buff.fields['pn_alt0'] = '74LVC2G34FW5-7'
@@ -129,13 +129,12 @@ def d20_generate_design():
 
         # Misc Pins
         d['VDD','GND'] += vcc, gnd
-        d['CLK', 'LE', '~OE'] += sclk, latch, blank
+        d['CLK', 'LE', '~{OE}'] += sclk, latch, blank
     
     # connect common signals
     for rd in row_driver:
         rd['SRCLK', 'RCLK', '~{OE}', '~{SRCLR}'] += sclk, latch, gnd, vcc
         rd['VCC', 'GND'] += vcc, gnd
-
 
     # attach serial input
     drivers[0]['SDI'] += data
@@ -147,21 +146,14 @@ def d20_generate_design():
     # patch through row driver shift register
     Net(f'sdo_{drivers[-1].ref}') & drivers[-1]['SDO'] & row_driver[0]['SER']
     
-
     for src, dst in zip(row_driver[0:], row_driver[1:]):
         Net(f'sdo_{src.ref}>sdi_{dst.ref}') & src['QH\''] & dst['SER']
-    
-
     data_out & row_driver[-1]['QH\'']
 
-
     driver_list = [f'OUT{i}' for i in range(16)]
-
     drivers[0][driver_list] += array.col_r[0:16]
     drivers[1][driver_list] += array.col_g[0:16]
     drivers[2][driver_list] += array.col_b[0:16]
-
-    
 
     for p,anode,driver in zip(row_pmos[0:8],array.row[0:8],row_driver[0][[f'Q{ascii_uppercase[idx]}' for idx in range(8)]]):
         Net(f's{anode.name}') & p['G'] & driver
@@ -171,7 +163,8 @@ def d20_generate_design():
         Net(f's{anode.name}') & p['G'] & driver
         p['D'] += anode
         p['S'] += vcc
-
+    # Unused pin
+    row_driver[1]['QH'] & NC
 
     inputBuffers = buff(2)
     for b in inputBuffers:
@@ -186,13 +179,6 @@ def d20_generate_design():
     inputBuffers[1]['Y2'] & latch
     inputBuffers[1]['A1'] & sclk_in
     inputBuffers[1]['Y1'] & sclk 
-
-
-    
-
-
-
-
 
 def generate_bom(file):
     parts = []
@@ -251,7 +237,6 @@ if __name__ == "__main__":
     d20_generate_design()
     ERC()
     generate_netlist()
-    generate_xml()
-
+    
     # Create a BOM
     generate_bom('../Production/d20_tri_r1.0.csv')
