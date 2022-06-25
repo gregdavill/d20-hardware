@@ -17,16 +17,16 @@ class matrix():
 
         for r in range(y):
             for c in range(x):
+
+                # On triangular board we remove a triangular section of LEDs from the logical 
+                # square matrix arangement, This aids in routing the mess on a 4L board with 
+                # through holes.
+                if c >= (15 - r):
+                    default_circuit.parts.remove(self.leds[r*x + c])
+                    continue
+
                 self.leds[r*x + c][4,3,2] += self.col_r[c],self.col_g[c],self.col_b[c]
                 self.leds[r*x + c][1] += self.row[r]
-
-        # On triangular board we remove a triangular section of LEDs from the logical 
-        # square matrix arangement, This aids in routing the mess on a 4L board with 
-        # through holes.
-        for r in range(y):
-            for c in range(x):
-                if r >= c:
-                    default_circuit.parts.remove(self.leds[r*x + c])
 
 def d20_generate_design():
     #===============================================================================
