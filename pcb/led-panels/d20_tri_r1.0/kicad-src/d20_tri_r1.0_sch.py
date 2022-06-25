@@ -20,8 +20,15 @@ class matrix():
                 self.leds[r*x + c][4,3,2] += self.col_r[c],self.col_g[c],self.col_b[c]
                 self.leds[r*x + c][1] += self.row[r]
 
-def d20_generate_design():
+        # On triangular board we remove a triangular section of LEDs from the logical 
+        # square matrix arangement, This aids in routing the mess on a 4L board with 
+        # through holes.
+        for r in range(y):
+            for c in range(x):
+                if r >= c:
+                    default_circuit.parts.remove(self.leds[r*x + c])
 
+def d20_generate_design():
     #===============================================================================
     # Component templates.
     #===============================================================================
@@ -29,10 +36,14 @@ def d20_generate_design():
     shift = Part('74xx', '74HC595', dest=TEMPLATE, footprint='gkl_misc:TSSOP-16_slim')
     shift.fields['pn'] = '74HC595PW\,118'
     shift.fields['mfg'] = 'Texas Instruments'
+    shift.fields['pn_alt0'] = 'HC595 (TSSOP-16)'
+    shift.fields['mfg_alt0'] = 'Various'
 
     conn = Part('Connector_Generic_Shielded', 'Conn_01x06_Shielded', dest=TEMPLATE, footprint='gkl_conn:5034800600')
     conn.fields['pn'] = '5034800600'
     conn.fields['mfg'] = 'molex'
+    conn.fields['pn_alt0'] = 'FH34SRJ-6S-0.5SH(50)'
+    conn.fields['mfg_alt0'] = 'Hirose'
 
     cap = Part('Device', 'C', dest=TEMPLATE, footprint='Capacitor_SMD:C_0402_1005Metric')
     rgb = Part('Device', 'LED_ARGB', dest=TEMPLATE, footprint='gkl_led:led_rbag_1515_dense')
@@ -41,16 +52,21 @@ def d20_generate_design():
 
     pmos = Part('Device', 'Q_PMOS_GSD', dest=TEMPLATE, footprint='Package_TO_SOT_SMD:SOT-883', value='LP0404N3T5G')
     pmos.fields['pn'] = 'LP0404N3T5G'
+    pmos.fields['mfg'] = 'LRC'
 
     res = Part('Device', 'R', dest=TEMPLATE, footprint='Resistor_SMD:R_0402_1005Metric')
 
     tlc59025 = Part('gkl_misc', 'TLC59025', dest=TEMPLATE, footprint='gkl_misc:SSOP-24_slim')
     tlc59025.fields['pn'] = 'SM16206S'
+    tlc59025.fields['mfg'] = 'Sunmoon Micro'
 
     buff = Part('gkl_misc', 'NC7WZ17', dest=TEMPLATE, footprint='gkl_misc:UDFN-6_1x1mm_P0.35mm')
-    buff.fields['pn'] = 'NC7WZ17'
+    buff.fields['pn'] = 'NC7WZ17FHX'
+    buff.fields['mfg'] = 'onsemi / Fairchild'
+    buff.fields['pn_alt0'] = '74LVC2G34FW5-7'
+    buff.fields['mfg_alt0'] = 'Diodes Inc'
 
-    vcc, gnd = Net('vcc'), Net('gnd')
+    vcc, gnd = Net('vcc', drive=POWER), Net('gnd', drive=POWER)
 
     # input connecions
     sclk_in, latch_in, blank_in, data_in = Net('sclk_i'), Net('latch_i'), Net('blank_i'), Net('dat_i')
@@ -63,12 +79,12 @@ def d20_generate_design():
     # Component instantiations.
     #===============================================================================
 
-    bypass = cap(3, value='100nF')
+    bypass = cap(3, value='470nF', pn='CC0402KRX5R6BB474', mfg='Yageo')
     for c in bypass:
         c[1,2] += vcc, gnd
 
-    inputConnector = conn(name='input')
-    outputConnector = conn(name='output')
+    inputConnector = conn(value='input')
+    outputConnector = conn(value='output')
 
 
     inputConnector[1] & vcc
@@ -97,11 +113,16 @@ def d20_generate_design():
     row_driver = shift(2)
     row_pmos = pmos(y)
 
-    # attach resistors to drivers
-    values = ['2.2k', '7.5k', '4.12k']
+    # attach resistors to drivers (Preliminary values)
+    values = [
+        {'r':'2.2k',  'pn':'RC0402FR-072K2L',  'mfg':'Yageo'},
+        {'r':'7.5k',  'pn':'RC0402FR-077K5L',  'mfg':'Yageo'},
+        {'r':'4.12k', 'pn':'RC0402FR-074K12L', 'mfg':'Yageo'}]
     i_set = res(3)
     for r,d,v in zip(i_set,drivers, values):
-        r.value = v
+        r.value = v['r']
+        r.pn = v['pn']
+        r.mfg = v['mfg']
 
         Net(f'{d.ref}_r_ext') & r[1] & d['R-EXT']
         r[2] & gnd
@@ -165,24 +186,27 @@ def d20_generate_design():
     inputBuffers[1]['Y2'] & latch
     inputBuffers[1]['A1'] & sclk_in
     inputBuffers[1]['Y1'] & sclk 
+
+
     
 
 
-def equal_dicts(d1, d2, ignore_keys):
-    d1_filtered = {k:v for k,v in d1.items() if k not in ignore_keys}
-    d2_filtered = {k:v for k,v in d2.items() if k not in ignore_keys}
-    return d1_filtered == d2_filtered
+
 
 
 def generate_bom(file):
     parts = []
     netlist = ''
+    def equal_dicts(d1, d2, ignore_keys):
+        d1_filtered = {k:v for k,v in d1.items() if k not in ignore_keys}
+        d2_filtered = {k:v for k,v in d2.items() if k not in ignore_keys}
+        return d1_filtered == d2_filtered
     def get_unique(part):
         unique_parts = []
         for p in parts:
             skip = False
             for _p in unique_parts:
-                if equal_dicts(p,_p,('ref')):
+                if equal_dicts(p,_p,('ref', 'value')):
                     _p['ref'] += p['ref']
                     skip = True
                     break
@@ -202,6 +226,8 @@ def generate_bom(file):
             'name':self.name, 
             'pn': getattr(self, 'pn', ''),
             'mfg': getattr(self, 'mfg', ''),
+            'pn_alt0': getattr(self, 'pn_alt0', ''),
+            'mfg_alt0': getattr(self, 'mfg_alt0', ''),
         }
         
     for p in default_circuit.parts:
@@ -211,7 +237,7 @@ def generate_bom(file):
 
     u = get_unique(parts)
     with open(file, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames = ['qty', 'ref', 'value', 'name', 'pn', 'mfg'])
+        writer = csv.DictWriter(csvfile, fieldnames = ['qty', 'ref', 'value', 'name', 'pn', 'mfg', 'pn_alt0', 'mfg_alt0'])
         writer.writeheader()
         writer.writerows(u)
 
@@ -223,6 +249,7 @@ def generate_bom(file):
 
 if __name__ == "__main__":
     d20_generate_design()
+    ERC()
     generate_netlist()
     generate_xml()
 
