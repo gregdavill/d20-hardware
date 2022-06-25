@@ -64,6 +64,7 @@
         "drill_out_of_range": "error",
         "duplicate_footprints": "warning",
         "extra_footprint": "warning",
+        "footprint_type_mismatch": "error",
         "hole_clearance": "error",
         "hole_near_hole": "error",
         "invalid_outline": "error",
@@ -79,9 +80,10 @@
         "padstack": "error",
         "pth_inside_courtyard": "ignore",
         "shorting_items": "error",
-        "silk_over_copper": "error",
-        "silk_overlap": "error",
+        "silk_over_copper": "warning",
+        "silk_overlap": "warning",
         "skew_out_of_range": "error",
+        "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
         "track_dangling": "warning",
         "track_width": "error",
@@ -100,7 +102,7 @@
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_copper_edge_clearance": 0.075,
-        "min_hole_clearance": 0.0,
+        "min_hole_clearance": 0.25,
         "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
@@ -108,7 +110,8 @@
         "min_through_hole_diameter": 0.19999999999999998,
         "min_track_width": 0.1143,
         "min_via_annular_width": 0.049999999999999996,
-        "min_via_diameter": 0.44999999999999996
+        "min_via_diameter": 0.44999999999999996,
+        "use_height_for_length_calcs": true
       },
       "track_widths": [
         0.0,
@@ -149,7 +152,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "d20_tri_r0.3.kicad_pro",
+    "filename": "d20_tri_r1.0.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -173,7 +176,7 @@
       }
     ],
     "meta": {
-      "version": 0
+      "version": 2
     },
     "net_colors": null
   },
@@ -181,7 +184,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "test_design.net",
+      "netlist": "d20_tri_r1.0_sch.net",
       "specctra_dsn": "",
       "step": "",
       "vmrl": "",

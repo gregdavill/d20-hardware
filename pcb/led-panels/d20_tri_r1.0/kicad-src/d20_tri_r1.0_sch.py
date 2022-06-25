@@ -10,9 +10,9 @@ import csv
 class matrix():
     def __init__(self, x, y, device):
         self.leds = device(x*y)
-        self.col_r = [Net(f'colr_{i}') for i in range(x)]
-        self.col_g = [Net(f'colg_{i}') for i in range(x)]
-        self.col_b = [Net(f'colb_{i}') for i in range(x)]
+        self.col_r = [Net(f'colr_{i}') for i in range(y)]
+        self.col_g = [Net(f'colg_{i}') for i in range(y)]
+        self.col_b = [Net(f'colb_{i}') for i in range(y)]
         self.row = [Net(f'row_{i}') for i in range(y)]
 
         for r in range(y):
@@ -39,14 +39,14 @@ def d20_generate_design():
     shift.fields['pn_alt0'] = 'HC595 (TSSOP-16)'
     shift.fields['mfg_alt0'] = 'Various'
 
-    conn = Part('Connector_Generic_Shielded', 'Conn_01x06_Shielded', dest=TEMPLATE, footprint='gkl_conn:5034800600')
+    conn = Part('Connector_Generic_Shielded', 'Conn_01x06_Shielded', dest=TEMPLATE, footprint='Led_Panel:5034800600')
     conn.fields['pn'] = '5034800600'
     conn.fields['mfg'] = 'molex'
     conn.fields['pn_alt0'] = 'FH34SRJ-6S-0.5SH(50)'
     conn.fields['mfg_alt0'] = 'Hirose'
 
     cap = Part('Device', 'C', dest=TEMPLATE, footprint='Capacitor_SMD:C_0402_1005Metric')
-    rgb = Part('Device', 'LED_ARGB', dest=TEMPLATE, footprint='gkl_led:led_rbag_1515_dense')
+    rgb = Part('Device', 'LED_ARGB', dest=TEMPLATE, footprint='Led_Panel:LED_1515_RBGA_slim')
     rgb.fields['pn'] = 'MHPA1515RGBDT'
     rgb.fields['mfg'] = 'MEIHUA' 
 
@@ -150,10 +150,14 @@ def d20_generate_design():
         Net(f'sdo_{src.ref}>sdi_{dst.ref}') & src['QH\''] & dst['SER']
     data_out & row_driver[-1]['QH\'']
 
-    driver_list = [f'OUT{i}' for i in range(16)]
-    drivers[0][driver_list] += array.col_r[0:16]
-    drivers[1][driver_list] += array.col_g[0:16]
-    drivers[2][driver_list] += array.col_b[0:16]
+    driver_list = [f'OUT{i}' for i in range(15)]
+    drivers[0][driver_list] += array.col_r[0:15]
+    drivers[1][driver_list] += array.col_g[0:15]
+    drivers[2][driver_list] += array.col_b[0:15]
+
+    drivers[0]['OUT15'] += NC
+    drivers[1]['OUT15'] += NC
+    drivers[2]['OUT15'] += NC
 
     for p,anode,driver in zip(row_pmos[0:8],array.row[0:8],row_driver[0][[f'Q{ascii_uppercase[idx]}' for idx in range(8)]]):
         Net(f's{anode.name}') & p['G'] & driver
